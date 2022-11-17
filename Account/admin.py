@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Usuarios,Transferencia,Instituicao
+from .models import Conta,Transferencia,Instituicao
 
 
 # Register your models here.
 
-@admin.register(Usuarios)
+@admin.register(Conta)
 class UsuariosAdmin(admin.ModelAdmin):
     ...
 
