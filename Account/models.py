@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 # Create your models here.
 
 
@@ -9,8 +10,9 @@ class Instituicao(models.Model):
         return self.nome_instituicao
 
 class Conta(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
     nome = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=11,unique=True)
+    cpf = models.CharField(max_length=11)
     saldo = models.FloatField(default=0)
     instituicao = models.ForeignKey(Instituicao,on_delete=models.PROTECT)
 

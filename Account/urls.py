@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from Account.views.apiviews import CriarUsuario, CriarConta
-
+from Account.views.apiviews import UsuarioCriarListar, ContaCriarListar
+# from Account.api.router import router
 
 app_name = "Account"
 
@@ -11,6 +11,9 @@ urlpatterns = [
     path('token/verify/',TokenVerifyView.as_view()),
     path('refresh/',TokenRefreshView.as_view()),
     
-    path('usuarios/',CriarUsuario.as_view()),
-    path('conta/',CriarConta.as_view())
+    path('usuarios/',UsuarioCriarListar.as_view(),),
+    path('conta/',ContaCriarListar.as_view(),name="detail-conta")
+    
 ]
+
+# urlpatterns += router.urls
