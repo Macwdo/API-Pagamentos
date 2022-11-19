@@ -7,15 +7,15 @@ app_name = "Account"
 
 
 urlpatterns = [
-    path('token/',TokenObtainPairView.as_view()),
-    path('token/verify/',TokenVerifyView.as_view()),
-    path('refresh/',TokenRefreshView.as_view()),
+    path('token/', TokenObtainPairView.as_view()),
+    path('token/verify/', TokenVerifyView.as_view()),
+    path('refresh/', TokenRefreshView.as_view()),
     
-    path('usuarios/',UsuarioCriarListar.as_view(),),
-    path('conta/',ContaCriarListar.as_view(),),
+    path('usuarios/', UsuarioCriarListar.as_view(), name="list-usuarios"),
+    path('conta/', ContaCriarListar.as_view(), name="list-conta"),
 
-    path('usuarios/<int:pk>',UsuarioDetail.as_view()),
-    path('conta/<int:pk>',ContaDetail.as_view())
+    path('usuarios/<int:pk>', UsuarioDetail.as_view(), name="detail-usuarios"),
+    path('conta/<int:pk>', ContaDetail.as_view(), name="detail-conta")
     
 ]
 

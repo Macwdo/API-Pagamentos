@@ -10,12 +10,11 @@ class Instituicao(models.Model):
         return self.nome_instituicao
 
 class Conta(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.SET_NULL,null=True)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     nome = models.CharField(max_length=100)
-    cpf = models.CharField(max_length=11)
+    cpf = models.CharField(max_length=11, unique=True)
     saldo = models.FloatField(default=0)
-    instituicao = models.ForeignKey(Instituicao,on_delete=models.PROTECT)
-
+    instituicao = models.ForeignKey(Instituicao, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.nome
@@ -28,5 +27,3 @@ class Transferencia(models.Model):
 
     def __str__(self):
         return self.origem.nome
-
-    

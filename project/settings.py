@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-3!8mocl!*yty@s^7+9^!5_bo%ypegavrzrwl!59u+#zqwfd1(@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -108,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-BR'
 
 TIME_ZONE = 'UTC'
 
@@ -127,7 +127,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#REST FRAMEWORK CONFIG
+# REST FRAMEWORK CONFIG
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -138,7 +138,7 @@ REST_FRAMEWORK = {
 }
 
 
-#SIMPLE JWT CONFIG
+# SIMPLE JWT CONFIG
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=10),
