@@ -10,12 +10,14 @@ class AccountUtils:
         self,
         username="testename",
         email="teste@email.com",
-        password="testesenha"
+        password="testesenha",
+        **kwargs
     ):
         usuario = User.objects.create(
             username=username,
             email=email,
-            password=password
+            password=password,
+            **kwargs
         )
         usuario.set_password(password)
         usuario.save()
@@ -68,3 +70,7 @@ class AccountUtils:
             valor=valor
         )
         return transferencia
+
+    # def get_jwt_token(username, password):
+    #     ...
+

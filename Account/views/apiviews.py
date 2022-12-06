@@ -4,9 +4,10 @@ from Account.api.serializers import UsuariosSerializer, ContaSerializer
 from rest_framework import permissions
 from Account.models import Conta
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied,ParseError,AuthenticationFailed
+from rest_framework.exceptions import PermissionDenied, ParseError, AuthenticationFailed
 from rest_framework.pagination import PageNumberPagination
 from Account.permissions import Dono
+import os
 
 
 class MyPagination(PageNumberPagination):
@@ -93,6 +94,7 @@ class ContaCriarListar(ListCreateAPIView):
             return super().post(request, *args, **kwargs)
         else:
             raise ParseError(detail="Você já tem uma conta")
+
 
     
 
