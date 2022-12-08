@@ -1,12 +1,13 @@
-from Account.models import Transferencia, Conta, Instituicao
 from django.contrib.auth.models import User
+
+from Account.models import Conta, Instituicao, Transferencia
 
 
 class AccountUtils:
 
     CPF = "12345678900"
 
-    def make_usuario(
+    def make_user(
         self,
         username="testename",
         email="teste@email.com",
@@ -23,7 +24,25 @@ class AccountUtils:
         usuario.save()
         return usuario
 
-    def make_instituicao(
+    def make_user_data(
+        self,
+        username="testename",
+        email="teste@email.com",
+        password="testesenha",
+        **kwargs
+    ):  
+        data = {
+            "username": username,
+            "email": email,
+            "password": password,
+        }
+        if kwargs:
+            for key, values in kwargs.items():
+                data[key] = values
+        return data
+
+
+    def make_bank(
         self,
         nome_instituicao="Itau"
     ):
@@ -33,29 +52,63 @@ class AccountUtils:
 
         return instituicao
 
-    def make_conta(
+    def make_bank_data(
+        self,
+        nome_instituicao="Itau"
+    ):
+        data = {
+            "nome_instituicao": nome_instituicao
+        }
+
+        return data
+
+
+    def make_account(
         self,
         usuario=None,
         instituicao=None,
         nome="Teste teste",
         saldo=0.0,
+        cpf=None
     ):
+        if not cpf:
+            cpf = self.CPF
+
         if not usuario:
             usuario = {}
-        
-        if not instituicao:
-            instituicao = {}
+
 
         conta = Conta.objects.create(
             usuario=usuario,
             nome=nome,
-            cpf=self.CPF,
+            cpf=cpf,
             saldo=saldo,
-            instituicao=Instituicao.objects.create(**instituicao)
+            instituicao=instituicao
         )
         return conta
 
-    def make_transferencia(
+    def make_account_data(
+        self,
+        instituicao=None,
+        nome="Teste Account",
+        cpf=None,
+        **kwargs
+    ):
+        if not cpf:
+            cpf = self.CPF
+
+        data = {
+            "nome": nome,
+            "cpf": cpf,
+            "instituicao": instituicao
+        }
+
+        if kwargs:
+            for key, values in kwargs.items():
+                data[key] = values
+        return data
+
+    def make_transfer(
         self,
         origem=None,
         valor=10
@@ -73,4 +126,3 @@ class AccountUtils:
 
     # def get_jwt_token(username, password):
     #     ...
-
