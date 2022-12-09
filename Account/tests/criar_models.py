@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
-
+from rest_framework.test import APISimpleTestCase
 from Account.models import Conta, Instituicao, Transferencia
 
 
-class AccountUtils:
+class AccountUtils(APISimpleTestCase):
 
     CPF = "12345678900"
+
 
     def make_user(
         self,

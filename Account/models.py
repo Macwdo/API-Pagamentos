@@ -20,10 +20,10 @@ class Conta(models.Model):
         return self.nome
 
 class Transferencia(models.Model):
-    origem = models.ForeignKey(Conta, on_delete=models.CASCADE)
-    destino = models.CharField(max_length=11)
+    origem = models.ForeignKey(Conta, on_delete=models.CASCADE, related_name="Origem")
+    destino = models.ForeignKey(Conta, on_delete=models.CASCADE, related_name="Destinatario")
     valor = models.FloatField()
     data = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.origem.nome
+        return f"{self.origem.nome} - {self.destino.nome}"

@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
-from Account.models import Conta, Instituicao
+from Account.models import Conta, Instituicao, Transferencia
 
 
 class ContaSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class ContaSerializer(serializers.ModelSerializer):
     def validate_cpf(self, value):
         regex = re.compile(r"([0-9]{2}[\.]?[0-9]{3}[\.]?[0-9]{3}[\/]?[0-9]{4}[-]?[0-9]{2})|([0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2})")
         if regex.match(value) is None:
-            raise ValidationError("cpf não é valido", code=status.HTTP_406_NOT_ACCEPTABLE)
+            raise ValidationError(detail={"cpf": "cpf não é valido"})
         return value
 
     def validate_saldo(self, value):
@@ -38,15 +38,35 @@ class UsuariosSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "email", "password", "password2",)
 
+    
+    def validate(self, attrs):
+        if attrs["password"] == attrs["password2"]:
+            return super().validate(attrs)
+        else:
+            raise ValidationError(detail="As senhas são diferentes")
+
+
     def save(self, *args, **kwargs):
         user = User(
             username=self.validated_data["username"],
             email=self.validated_data["email"],
             password=self.validated_data["password"],
         )
-        if self.validated_data["password"] != self.validated_data["password2"]:
-            raise ValidationError("As senhas são diferentes")
-
         user.set_password(self.validated_data["password"])
         user.save()
         return user
+
+class TransferenciaSerializer(serializers.ModelSerializer):
+    cpf_origem = serializers.StringRelatedField(source="origem.cpf", read_only=True)
+    cpf_destinatario = serializers.StringRelatedField(source="destino.cpf", read_only=True)
+
+    instituicao_origem = serializers.StringRelatedField(source="origem.instituicao", read_only=True)
+    instituicao_destinatario = serializers.StringRelatedField(source="destino.instituicao", read_only=True)
+
+    origem = serializers.PrimaryKeyRelatedField(queryset=Transferencia.objects.all(), write_only=True)
+    destino = serializers.PrimaryKeyRelatedField(queryset=Transferencia.objects.all(), write_only=True)
+
+
+    class Meta:
+        model = Transferencia
+        fields = "__all__"

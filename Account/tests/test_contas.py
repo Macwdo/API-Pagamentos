@@ -39,7 +39,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
         bank = self.make_bank()
         account = self.make_account(admin, bank)
         token = self.get_jwt_token(username="testename", password="testesenha")
-        data = self.make_account_data(nome="New Name", instituicao=bank.id, cpf="93212343482")
+        data = self.make_account_data(nome="New Name", instituicao=bank.id, cpf="93212343482", usuario=admin.id)
         response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}),
                                      data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -95,7 +95,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
         response = self.client.post(reverse("Account:list-account"), data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_authenticated_user_can_patch_change_your_account_name(self):
+    def test_authenticated_user_cant_patch_change_your_account_name(self):
         user = self.make_user()
         token = self.get_jwt_token()
         bank = self.make_bank()
@@ -103,17 +103,17 @@ class ContasTestes(test.APITestCase, AccountUtils):
         data = {"nome": "TestePatch"}
         response = self.client.patch(reverse("Account:detail-account", kwargs={"pk": account.id}),
                                      data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authenticated_user_cant_patch_add_money(self):
         user = self.make_user()
         token = self.get_jwt_token()
         bank = self.make_bank()
         account = self.make_account(user, instituicao=bank)
-        data = {"saldo": "12332112344"}
+        data = {"saldo": "123.0"}
         response = self.client.patch(reverse("Account:detail-account", kwargs={"pk": account.id}),
                                      data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.data["saldo"], account.saldo)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authenticated_user_cant_patch_change_your_account_cpf(self):
         user = self.make_user()
@@ -125,7 +125,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
                                      data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_authenticated_user_can_patch_change_bank(self):
+    def test_authenticated_user_cant_patch_change_bank(self):
         user = self.make_user()
         token = self.get_jwt_token()
         bank1, bank2 = self.make_bank(), self.make_bank(nome_instituicao="bradesco")
@@ -135,7 +135,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
             reverse("Account:detail-account", kwargs={"pk": account.id}),
             data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}"
         )
-        self.assertEqual(response.data["banco"], bank2.nome_instituicao)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authenticated_user_can_put_change_your_account_name(self):
         user = self.make_user()
@@ -145,6 +145,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
         data = self.make_account_data(instituicao=bank.id, usuario=user.id)
         response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}),
                                    data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_authenticated_user_cant_put_change_other_accont(self):
@@ -152,17 +153,17 @@ class ContasTestes(test.APITestCase, AccountUtils):
         token = self.get_jwt_token(username="testeuser1", password="testesenha")
         bank = self.make_bank()
         account_user2 = self.make_account(user2, cpf="12332132112", instituicao=bank)
-        data = self.make_account_data(cpf="12332132112", instituicao=bank.id)
+        data = self.make_account_data(cpf="12332132112", instituicao=bank.id, usuario=user2.id)
         response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account_user2.id}),
                                    data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_cant_put_change_your_account_cpf(self):
         user = self.make_user()
         token = self.get_jwt_token()
         bank = self.make_bank()
         account = self.make_account(user, instituicao=bank)
-        data = self.make_account_data(cpf="12333342122", instituicao=bank.id)
+        data = self.make_account_data(cpf="12333342122", instituicao=bank.id, usuario=user.id)
         response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}), data=data, format="json", HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
