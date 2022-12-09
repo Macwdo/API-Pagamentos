@@ -63,10 +63,14 @@ class TransferenciaSerializer(serializers.ModelSerializer):
     instituicao_origem = serializers.StringRelatedField(source="origem.instituicao", read_only=True)
     instituicao_destinatario = serializers.StringRelatedField(source="destino.instituicao", read_only=True)
 
-    origem = serializers.PrimaryKeyRelatedField(queryset=Transferencia.objects.all(), write_only=True)
-    destino = serializers.PrimaryKeyRelatedField(queryset=Transferencia.objects.all(), write_only=True)
+    origem = serializers.PrimaryKeyRelatedField(queryset=Conta.objects.all(), write_only=True)
+    destino = serializers.PrimaryKeyRelatedField(queryset=Conta.objects.all(), write_only=True)
 
 
     class Meta:
         model = Transferencia
-        fields = "__all__"
+        fields = (
+            "id", "cpf_origem", "cpf_destinatario",
+            "instituicao_origem", "instituicao_destinatario",
+            "origem", "destino", "valor", "data"
+            )
