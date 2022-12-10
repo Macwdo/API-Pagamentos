@@ -14,9 +14,9 @@ class TabelasTestes(test.APITestCase, AccountUtils):
         conta = self.make_account(usuario=usuario, instituicao=banco)
         self.assertEqual(str(conta), conta.nome)
 
-    def test_transferencia_retorna_origem_nome(self):
-        usuario = self.make_user()
+    def test_transferencia_retorna_nome(self):
+        origem, destino = self.make_user(), self.make_user(username="testename2", email="teste2@email.com")
         banco = self.make_bank()
-        conta = self.make_account(usuario=usuario, instituicao=banco)
-        transferencia = self.make_transfer(origem=conta)
-        self.assertEqual(str(transferencia), transferencia.origem.nome)
+        conta_origem, conta_destino = self.make_account(usuario=origem, instituicao=banco), self.make_account(usuario=destino, instituicao=banco, cpf="99211299932")
+        transferencia = self.make_transfer(origem=conta_origem, destino=conta_destino)
+        self.assertEqual(str(transferencia), f"{conta_origem.nome} - {conta_destino.nome}")

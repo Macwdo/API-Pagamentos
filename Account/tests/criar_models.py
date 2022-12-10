@@ -112,6 +112,7 @@ class AccountUtils(APISimpleTestCase):
     def make_transfer(
         self,
         origem=None,
+        destino=None,
         valor=10
 
     ):
@@ -120,7 +121,7 @@ class AccountUtils(APISimpleTestCase):
 
         transferencia = Transferencia.objects.create(
             origem=origem,
-            destino=self.CPF,
+            destino=destino,
             valor=valor
         )
         return transferencia

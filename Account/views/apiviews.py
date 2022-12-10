@@ -3,13 +3,15 @@ from rest_framework import permissions, status
 from rest_framework.exceptions import (AuthenticationFailed, ParseError,
                                        PermissionDenied)
 from rest_framework.generics import (ListCreateAPIView,
- 
                                      RetrieveUpdateDestroyAPIView)
+
+from Account.api.serializers import (ContaSerializer, TransferenciaSerializer,
+                                     UsuariosSerializer)
+from Account.models import Conta, Transferencia
+from Account.permissions import Owner
+
 #from rest_framework.pagination import PageNumberPagination
 
-from Account.api.serializers import ContaSerializer, UsuariosSerializer, TransferenciaSerializer
-from Account.models import Conta, Transferencia
-from Account.permissions import Dono
 
 # class MyPagination(PageNumberPagination): Alterando atributo da classe de paginação
 #     page_size = 10
@@ -27,7 +29,7 @@ class UserCreateList(ListCreateAPIView):
 class AccountDetail(RetrieveUpdateDestroyAPIView):
     queryset = Conta.objects.all()
     serializer_class = ContaSerializer
-    permission_classes = [Dono]
+    permission_classes = [Owner]
 
     def patch(self, request, *args, **kwargs):
         campos = {
@@ -43,18 +45,17 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
                 raise PermissionDenied(f"Não é possível alterar o campo de {key}", code=status.HTTP_403_FORBIDDEN)
         return super().patch(request, *args, **kwargs)
 
-
     def put(self, request, *args, **kwargs):
         campos_request = {
             "cpf": request.data.get("cpf", None),
             "saldo": request.data.get("saldo", None),
-            "usuario": request.data.get("usuario",None),
+            "usuario": request.data.get("usuario", None),
             "instituicao": request.data.get("instituicao", None)
 
         }
 
         if int(request.user.id) != int(campos_request["usuario"]):
-            raise AuthenticationFailed(f"Você não é o Dono desta Conta")
+            raise AuthenticationFailed(f"Você não é o Owner desta Conta")
 
         conta = Conta.objects.get(id=self.kwargs.get("pk"))
         campos_conta = (conta.cpf, conta.saldo, conta.usuario.pk, conta.instituicao)
@@ -84,7 +85,7 @@ class AccountCreateList(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         if request.user.is_anonymous:
             raise AuthenticationFailed(detail="Você precisa estar logado para fazer isso")
-        id = self.request.user.id
+        id = request.user.id
         request.data["usuario"] = id
 
         conta = Conta.objects.filter(usuario=id)
@@ -96,5 +97,3 @@ class AccountCreateList(ListCreateAPIView):
 class TransferCreateList(ListCreateAPIView):
     queryset = Transferencia.objects.all()
     serializer_class = TransferenciaSerializer
-
-    
