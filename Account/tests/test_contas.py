@@ -177,14 +177,14 @@ class ContasTestes(test.APITestCase, AccountUtils):
         response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}), data=data, HTTP_AUTHORIZATION=f"Bearer {token}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_authenticated_user_cant_put_add_money(self):
-        user = self.make_user()
-        token = self.get_jwt_token()
-        bank = self.make_bank()
-        account = self.make_account(user, instituicao=bank)
-        data = self.make_account_data(instituicao=bank.id, usuario=user.id, saldo="321321.0")
-        response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}), data=data, HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.data["saldo"], account.saldo)
+    # def test_authenticated_user_cant_put_add_money(self):
+    #     user = self.make_user()
+    #     token = self.get_jwt_token()
+    #     bank = self.make_bank()
+    #     account = self.make_account(user, instituicao=bank)
+    #     data = self.make_account_data(instituicao=bank.id, usuario=user.id, saldo="321321.0")
+    #     response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}), data=data, HTTP_AUTHORIZATION=f"Bearer {token}")
+    #     self.assertEqual(response.data["saldo"], account.saldo)
 
     def test_authenticated_user_can_delete_your_account(self):
         user = self.make_user()

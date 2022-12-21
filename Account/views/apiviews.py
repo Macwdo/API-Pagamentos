@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import permissions, status
 from rest_framework.exceptions import (AuthenticationFailed, ParseError,
-                                       PermissionDenied)
+                                       PermissionDenied, ValidationError)
 from rest_framework.generics import (ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView)
 
@@ -9,6 +9,7 @@ from Account.api.serializers import (ContaSerializer, TransferenciaSerializer,
                                      UsuariosSerializer)
 from Account.models import Conta, Transferencia
 from Account.permissions import Owner
+from django.db.models import Q
 
 #from rest_framework.pagination import PageNumberPagination
 
@@ -55,9 +56,9 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
         }
 
         if int(request.user.id) != int(campos_request["usuario"]):
-            raise AuthenticationFailed(f"Você não é o Owner desta Conta")
+            raise AuthenticationFailed(f"Você não é o Dono desta Conta")
 
-        conta = Conta.objects.get(id=self.kwargs.get("pk"))
+        conta = Conta.objects.get(usuario=request.user.id)
         campos_conta = (conta.cpf, conta.saldo, conta.usuario.pk, conta.instituicao)
 
         for valor_conta, valor_request_key, valor_request_value in zip(campos_conta, campos_request.keys(), campos_request.values()):
@@ -97,3 +98,12 @@ class AccountCreateList(ListCreateAPIView):
 class TransferCreateList(ListCreateAPIView):
     queryset = Transferencia.objects.all()
     serializer_class = TransferenciaSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            queryset = Transferencia.objects.all()
+        else:
+            account = Conta.objects.get(usuario=user.id)
+            queryset = Transferencia.objects.filter(origem=account.pk)
+        return queryset

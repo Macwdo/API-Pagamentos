@@ -1,8 +1,8 @@
 import re
-
 from django.contrib.auth.models import User
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
 
 from Account.models import Conta, Instituicao, Transferencia
 
@@ -28,7 +28,6 @@ class ContaSerializer(serializers.ModelSerializer):
         return value
 
     def validate_saldo(self, value):
-        value = 0
         return value
 
 
@@ -48,7 +47,6 @@ class UsuariosSerializer(serializers.ModelSerializer):
         else:
             raise ValidationError(detail="As senhas são diferentes")
 
-
     def save(self, *args, **kwargs):
         user = User(
             username=self.validated_data["username"],
@@ -62,9 +60,18 @@ class UsuariosSerializer(serializers.ModelSerializer):
 class TransferenciaSerializer(serializers.ModelSerializer):
     instituicao_origem = serializers.StringRelatedField(source="origem.instituicao", read_only=True)
     instituicao_destinatario = serializers.StringRelatedField(source="destino.instituicao", read_only=True)
-    cpf_origem = serializers.CharField(max_length=11, allow_blank=False)
-    cpf_destino = serializers.CharField(max_length=11, allow_blank=False)
-    id_transferencia = serializers.IntegerField(source="id", read_only=True)
+    cpf_origem = serializers.CharField(max_length=11, allow_blank=False, write_only=True)
+    cpf_destino = serializers.CharField(max_length=11, allow_blank=False, write_only=True)
+    origem = serializers.StringRelatedField(source="origem.cpf", read_only=True)
+    destino = serializers.StringRelatedField(source="destino.cpf", read_only=True)
+
+    class Meta:
+        model = Transferencia
+        fields = (
+            "cpf_origem", "cpf_destino", "origem", "destino",
+            "instituicao_origem", "instituicao_destinatario",
+            "valor", "data",
+            )
 
     def validate_cpf_origem(self, value):
         cpf_validation(value)
@@ -76,19 +83,20 @@ class TransferenciaSerializer(serializers.ModelSerializer):
 
 
     def save(self, *args, **kwargs):
-        origem = Conta.objects.get(cpf=self.validated_data["cpf_origem"])
-        destino = Conta.objects.get(cpf=self.validated_data["cpf_destino"])
+        try:
+            origem = Conta.objects.get(cpf=self.validated_data["cpf_origem"])
+            destino = Conta.objects.get(cpf=self.validated_data["cpf_destino"])
+        except Conta.DoesNotExist:
+            raise ValidationError({"conta": "Error ao Informar a conta"})
+        valor = self.validated_data["valor"]
+        if origem.saldo >= valor:
+            origem.saldo -= valor
+            destino.saldo += valor
+        else:
+            raise ValidationError(detail={"saldo": "Conta informada não tem saldo suficiente"})
         transferencia = Transferencia.objects.create(
             origem=origem,
             destino=destino,
             valor=self.validated_data["valor"],
         )
         return transferencia
-
-    class Meta:
-        model = Transferencia
-        fields = (
-            "id_transferencia", "cpf_origem", "cpf_destino",
-            "instituicao_origem", "instituicao_destinatario",
-            "valor", "data",
-            )
