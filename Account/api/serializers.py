@@ -40,7 +40,6 @@ class UsuariosSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "username", "email", "password", "password2",)
 
-    
     def validate(self, attrs):
         if attrs["password"] == attrs["password2"]:
             return super().validate(attrs)
@@ -60,38 +59,39 @@ class UsuariosSerializer(serializers.ModelSerializer):
 class TransferenciaSerializer(serializers.ModelSerializer):
     instituicao_origem = serializers.StringRelatedField(source="origem.instituicao", read_only=True)
     instituicao_destinatario = serializers.StringRelatedField(source="destino.instituicao", read_only=True)
-    cpf_origem = serializers.CharField(max_length=11, allow_blank=False, write_only=True)
-    cpf_destino = serializers.CharField(max_length=11, allow_blank=False, write_only=True)
-    origem = serializers.StringRelatedField(source="origem.cpf", read_only=True)
-    destino = serializers.StringRelatedField(source="destino.cpf", read_only=True)
+    cpf_origem = serializers.CharField(source="origem.cpf",max_length=11, allow_blank=False)
+    cpf_destino = serializers.CharField(source="destino.cpf",max_length=11, allow_blank=False)
+
 
     class Meta:
         model = Transferencia
         fields = (
-            "cpf_origem", "cpf_destino", "origem", "destino",
+            "cpf_origem", "cpf_destino",
             "instituicao_origem", "instituicao_destinatario",
             "valor", "data",
-            )
+        )
 
     def validate_cpf_origem(self, value):
         cpf_validation(value)
         return value
-    
+
     def validate_cpf_destino(self, value):
         cpf_validation(value)
         return value
 
-
     def save(self, *args, **kwargs):
         try:
-            origem = Conta.objects.get(cpf=self.validated_data["cpf_origem"])
-            destino = Conta.objects.get(cpf=self.validated_data["cpf_destino"])
+            origem = Conta.objects.get(cpf=self.validated_data["origem"]["cpf"])
+            destino = Conta.objects.get(cpf=self.validated_data["destino"]["cpf"])
         except Conta.DoesNotExist:
+            print(self.validated_data)
             raise ValidationError({"conta": "Error ao Informar a conta"})
         valor = self.validated_data["valor"]
         if origem.saldo >= valor:
             origem.saldo -= valor
             destino.saldo += valor
+            origem.save()
+            destino.save()
         else:
             raise ValidationError(detail={"saldo": "Conta informada não tem saldo suficiente"})
         transferencia = Transferencia.objects.create(

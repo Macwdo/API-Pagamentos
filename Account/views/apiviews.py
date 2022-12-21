@@ -9,9 +9,8 @@ from Account.api.serializers import (ContaSerializer, TransferenciaSerializer,
                                      UsuariosSerializer)
 from Account.models import Conta, Transferencia
 from Account.permissions import Owner
-from django.db.models import Q
 
-#from rest_framework.pagination import PageNumberPagination
+# from rest_framework.pagination import PageNumberPagination
 
 
 # class MyPagination(PageNumberPagination): Alterando atributo da classe de paginação
@@ -30,7 +29,14 @@ class UserCreateList(ListCreateAPIView):
 class AccountDetail(RetrieveUpdateDestroyAPIView):
     queryset = Conta.objects.all()
     serializer_class = ContaSerializer
-    permission_classes = [Owner]
+
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            queryset = Conta.objects.all()
+        else:
+            queryset = Conta.objects.get(usuario=self.request.user)
+        return queryset
 
     def patch(self, request, *args, **kwargs):
         campos = {
@@ -56,7 +62,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
         }
 
         if int(request.user.id) != int(campos_request["usuario"]):
-            raise AuthenticationFailed(f"Você não é o Dono desta Conta")
+            raise AuthenticationFailed("Você não é o Dono desta Conta")
 
         conta = Conta.objects.get(usuario=request.user.id)
         campos_conta = (conta.cpf, conta.saldo, conta.usuario.pk, conta.instituicao)
@@ -101,6 +107,8 @@ class TransferCreateList(ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if self.request.user.is_anonymous:
+            raise ValidationError({"detail": "Você precisa estar autenticado"})
         if user.is_superuser:
             queryset = Transferencia.objects.all()
         else:
