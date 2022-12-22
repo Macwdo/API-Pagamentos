@@ -8,7 +8,7 @@ from rest_framework.generics import (ListCreateAPIView,
 from Account.api.serializers import (ContaSerializer, TransferenciaSerializer,
                                      UsuariosSerializer)
 from Account.models import Conta, Transferencia
-from Account.permissions import Owner
+#from Account.permissions import Owner
 
 # from rest_framework.pagination import PageNumberPagination
 
@@ -41,7 +41,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         campos = {
             "cpf": request.data.get("cpf", None),
-            "saldo": request.data.get("saldo", None),
+            "saldo": request.data.get("saldo",None),
             "nome": request.data.get("nome", None),
             "instituicao": request.data.get("instituicao", None)
         }
