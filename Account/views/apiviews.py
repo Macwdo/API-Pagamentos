@@ -8,13 +8,7 @@ from rest_framework.generics import (ListCreateAPIView,
 from Account.api.serializers import (ContaSerializer, TransferenciaSerializer,
                                      UsuariosSerializer)
 from Account.models import Conta, Transferencia
-#from Account.permissions import Owner
 
-# from rest_framework.pagination import PageNumberPagination
-
-
-# class MyPagination(PageNumberPagination): Alterando atributo da classe de paginação
-#     page_size = 10
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
