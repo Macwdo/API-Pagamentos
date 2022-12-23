@@ -23,7 +23,7 @@ class UserCreateList(ListCreateAPIView):
 class AccountDetail(RetrieveUpdateDestroyAPIView):
     queryset = Conta.objects.all()
     serializer_class = ContaSerializer
-
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         if self.request.user.is_superuser:
@@ -35,7 +35,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         campos = {
             "cpf": request.data.get("cpf", None),
-            "saldo": request.data.get("saldo",None),
+            "saldo": request.data.get("saldo", None),
             "nome": request.data.get("nome", None),
             "instituicao": request.data.get("instituicao", None)
         }
@@ -72,7 +72,7 @@ class AccountDetail(RetrieveUpdateDestroyAPIView):
 class AccountCreateList(ListCreateAPIView):
     queryset = Conta.objects.all()
     serializer_class = ContaSerializer
-    # pagination_class = MyPagination
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
         if self.request.method == "GET":
@@ -98,6 +98,8 @@ class AccountCreateList(ListCreateAPIView):
 class TransferCreateList(ListCreateAPIView):
     queryset = Transferencia.objects.all()
     serializer_class = TransferenciaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
     def get_queryset(self):
         user = self.request.user

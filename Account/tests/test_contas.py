@@ -72,21 +72,6 @@ class ContasTestes(test.APITestCase, AccountUtils):
         print(response.data, response.status_code)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_user_authenticated_see_just_your_account(self):
-        user = self.make_user()
-        token = self.get_jwt_token()
-        bank = self.make_bank()
-        account = self.make_account(usuario=user, instituicao=bank)
-        response = self.client.get(reverse("Account:detail-account", kwargs={"pk": account.id}), HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.data["id"], account.id)
-
-    def test_user_authenticated_dont_see_other_account(self):
-        user1, user2 = self.make_user(username="testeuser1", email="teste1@email.com"), self.make_user(username="testeuser2", email="teste2@email.com")
-        bank = self.make_bank()
-        account_user2 = self.make_account(user2, cpf="12332132112", instituicao=bank)
-        token_user1 = self.get_jwt_token(username="testeuser1", password="testesenha")
-        response = self.client.get(reverse("Account:detail-account", kwargs={"pk": account_user2.id}), HTTP_AUTHORIZATION=f"Bearer {token_user1}")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_authenticated_user_can_create_your_account(self):
         user = self.make_user()
@@ -147,16 +132,7 @@ class ContasTestes(test.APITestCase, AccountUtils):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_authenticated_user_can_put_change_your_account_name(self):
-        user = self.make_user()
-        token = self.get_jwt_token()
-        bank = self.make_bank()
-        account = self.make_account(user, instituicao=bank)
-        data = self.make_account_data(instituicao=bank.id, usuario=user.id)
-        response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}),
-                                   data=data, HTTP_AUTHORIZATION=f"Bearer {token}")
-        print(response.data)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
     def test_authenticated_user_cant_put_change_other_accont(self):
         user1, user2 = self.make_user(username="testeuser1", email="teste1@email.com"), self.make_user(username="testeuser2", email="teste2@email.com")
@@ -186,18 +162,3 @@ class ContasTestes(test.APITestCase, AccountUtils):
     #     response = self.client.put(reverse("Account:detail-account", kwargs={"pk": account.id}), data=data, HTTP_AUTHORIZATION=f"Bearer {token}")
     #     self.assertEqual(response.data["saldo"], account.saldo)
 
-    def test_authenticated_user_can_delete_your_account(self):
-        user = self.make_user()
-        token = self.get_jwt_token()
-        bank = self.make_bank()
-        account = self.make_account(user, instituicao=bank)
-        response = self.client.delete(reverse("Account:detail-account", kwargs={"pk": account.id}), HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-    def test_authenticated_user_cant_delete_other_accont(self):
-        user1, user2 = self.make_user(username="testeuser1", email="teste1@email.com"), self.make_user(username="testeuser2", email="teste2@email.com")
-        token = self.get_jwt_token(username="testeuser1", password="testesenha")
-        bank = self.make_bank()
-        account_user2 = self.make_account(user2, cpf="12332132112", instituicao=bank)
-        response = self.client.delete(reverse("Account:detail-account", kwargs={"pk": account_user2.id}), HTTP_AUTHORIZATION=f"Bearer {token}")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
